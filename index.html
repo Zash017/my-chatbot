@@ -1,0 +1,61 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Meri Pehli Website</title>
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      padding: 50px;
+      background: #f0f8ff;
+    }
+
+    h1 {
+      color: #185FA5;
+    }
+
+    input {
+      padding: 10px;
+      font-size: 16px;
+      border: 2px solid #185FA5;
+      border-radius: 8px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #185FA5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 24px;
+      color: #0F6E56;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Meri Pehli Website!</h1>
+  <p>Apna naam likho:</p>
+  <input type="text" id="naam" placeholder="Naam yahan...">
+  <br><br>
+  <button onclick="salam()">Salam Karo!</button>
+  <div id="result"></div>
+
+  <script>
+    function salam() {
+      var naam = document.getElementById('naam').value;
+      document.getElementById('result').innerText = 'Salam ' + naam + '! Aapki website kaam kar rahi hai!';
+    }
+  </script>
+
+</body>
+</html>

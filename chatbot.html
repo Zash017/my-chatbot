@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <title>AI Assistant</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial; background: #1a1a2e; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    .chat-container { width: 420px; height: 600px; background: white; border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .chat-header { background: #185FA5; padding: 20px; text-align: center; }
+    .chat-header h2 { color: white; font-size: 20px; }
+    .chat-header p { color: #b3d4f0; font-size: 13px; margin-top: 4px; }
+    .chat-messages { flex: 1; padding: 20px; overflow-y: auto; background: #f8f9fa; }
+    .msg { margin: 10px 0; display: flex; }
+    .msg.user { justify-content: flex-end; }
+    .msg-bubble { max-width: 75%; padding: 12px 16px; border-radius: 18px; font-size: 14px; line-height: 1.5; }
+    .msg.user .msg-bubble { background: #185FA5; color: white; border-bottom-right-radius: 4px; }
+    .msg.ai .msg-bubble { background: white; color: #333; border-bottom-left-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .chat-input { padding: 16px; background: white; border-top: 1px solid #eee; display: flex; gap: 10px; }
+    .chat-input input { flex: 1; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 25px; font-size: 14px; outline: none; }
+    .chat-input input:focus { border-color: #185FA5; }
+    .chat-input button { background: #185FA5; color: white; border: none; border-radius: 50%; width: 44px; height: 44px; cursor: pointer; font-size: 18px; }
+    .typing { color: #999; font-size: 13px; padding: 0 20px 10px; }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">
+      <h2>🤖 AI Assistant</h2>
+      <p>Koi bhi sawaal poochein!</p>
+    </div>
+    <div class="chat-messages" id="chat-messages">
+      <div class="msg ai">
+        <div class="msg-bubble">Salam! Main aapka AI Assistant hoon. Kaise madad kar sakta hoon? 😊</div>
+      </div>
+    </div>
+    <div class="typing" id="typing"></div>
+    <div class="chat-input">
+      <input type="text" id="user-input" placeholder="Yahan likho...">
+      <button onclick="sendMessage()">➤</button>
+    </div>
+  </div>
+
+  <script>
+    var API_KEY = "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";
+
+    async function sendMessage() {
+      var input = document.getElementById('user-input');
+      var messages = document.getElementById('chat-messages');
+      var typing = document.getElementById('typing');
+      var userText = input.value.trim();
+      if (!userText) return;
+
+      messages.innerHTML += '<div class="msg user"><div class="msg-bubble">' + userText + '</div></div>';
+      input.value = '';
+      typing.innerText = 'AI soch raha hai...';
+      messages.scrollTop = messages.scrollHeight;
+
+      try {
+        var response = await fetch('http://localhost:3000/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01' },
+          body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 1000, messages: [{ role: 'user', content: userText }] })
+        });
+
+        var data = await response.json();
+        var aiText = data.content ? data.content[0].text : JSON.stringify(data);
+        typing.innerText = '';
+        messages.innerHTML += '<div class="msg ai"><div class="msg-bubble">' + aiText + '</div></div>';
+        messages.scrollTop = messages.scrollHeight;
+
+      } catch(err) {
+        typing.innerText = '';
+        messages.innerHTML += '<div class="msg ai"><div class="msg-bubble">Kuch masla hua, dobara koshish karein!</div></div>';
+      }
+    }
+
+    document.getElementById('user-input').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') sendMessage();
+    });
+  </script>
+</body>
+</html>
