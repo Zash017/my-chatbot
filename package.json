@@ -1,0 +1,22 @@
+{
+  "name": "vs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server - Copy.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server-groq.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zash017/my-chatbot.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Zash017/my-chatbot/issues"
+  },
+  "homepage": "https://github.com/Zash017/my-chatbot#readme"
+}
