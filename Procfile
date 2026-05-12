@@ -1,1 +1,1 @@
-web: node server-groq.js
+web: node server-restaurant.js
