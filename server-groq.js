@@ -32,4 +32,4 @@ app.post('/chat', async (req, res) => {
   }
 });
 
-app.listen(process.env.PORT || 3001, () => console.log('Groq Server chal raha hai!'));
+app.listen(process.env.PORT || 3000, () => console.log('Groq Server chal raha hai!'));
