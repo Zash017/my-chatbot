@@ -1,10 +1,15 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname)));
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'chatbot-groq.html'));
+});
 
 app.post('/chat', async (req, res) => {
   try {
@@ -21,7 +26,6 @@ app.post('/chat', async (req, res) => {
       })
     });
     const data = await response.json();
-    console.log('Groq Response:', JSON.stringify(data));
     res.json({
       content: [{
         text: data.choices[0].message.content
