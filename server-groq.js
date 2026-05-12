@@ -5,8 +5,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname)));
-
+app.use(express.static(path.join(__dirname, '.')));
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'chatbot-groq.html'));
 });
@@ -21,7 +20,13 @@ app.post('/chat', async (req, res) => {
       },
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
-        messages: req.body.messages,
+        messages: [
+  {
+    role: 'system',
+    content: 'You are a smart, helpful and professional AI assistant. Always respond in the SAME language the user writes in. If user writes in Roman Urdu, reply in Roman Urdu. If in English, reply in English. If in Arabic, reply in Arabic. Never mix languages. Be clear, intelligent and helpful like Claude AI.'
+  },
+  ...req.body.messages
+],
         max_tokens: 1000
       })
     });
