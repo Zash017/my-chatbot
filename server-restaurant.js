@@ -11,8 +11,29 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'chatbot-groq.html'));
 });
 
+function detectLanguage(text) {
+  const urduScript = /[\u0600-\u06FF]/;
+  if (urduScript.test(text)) return 'urdu';
+  const romanUrduWords = /\b(kya|hai|hain|karo|mujhe|aap|ka|ki|ke|mein|se|ko|tha|thi|bhi|nahi|hoga|kaise|kab|kahan|kyun|dikhao|batao|chahiye|milega|order|menu)\b/i;
+  if (romanUrduWords.test(text)) return 'roman';
+  return 'english';
+}
+
 app.post('/chat', async (req, res) => {
   try {
+    const messages = req.body.messages;
+    const lastMessage = messages[messages.length - 1].content;
+    const lang = detectLanguage(lastMessage);
+
+    let langInstruction = '';
+    if (lang === 'urdu') {
+      langInstruction = 'IMPORTANT: Reply ONLY in Urdu script (اردو). Do not use English or Roman Urdu.';
+    } else if (lang === 'roman') {
+      langInstruction = 'IMPORTANT: Reply ONLY in Roman Urdu. Do not use English or Urdu script.';
+    } else {
+      langInstruction = 'IMPORTANT: Reply ONLY in English. Do not use Urdu or Roman Urdu.';
+    }
+
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -20,20 +41,13 @@ app.post('/chat', async (req, res) => {
         'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
       },
       body: JSON.stringify({
-       model: 'mixtral-8x7b-32768',
+        model: 'mixtral-8x7b-32768',
         messages: [
           {
             role: 'system',
-            content: `You are "Ali", the AI assistant for Pizza Palace restaurant in Karachi. 
+            content: `You are "Ali", the AI assistant for Pizza Palace restaurant in Karachi.
 
-CRITICAL INSTRUCTION - LANGUAGE DETECTION:
-The user's message language determines your response language. This is your #1 priority rule.
-- If user writes in ENGLISH → your ENTIRE response must be in ENGLISH only
-- If user writes in URDU SCRIPT (اردو) → your ENTIRE response must be in URDU SCRIPT only  
-- If user writes in ROMAN URDU → your ENTIRE response must be in ROMAN URDU only
-- DO NOT use Hindi words like "uplabdh", "hain", "aapko" in English responses
-- NEVER respond in a different language than the user's message
-- NEVER use Roman Urdu when user wrote English
+${langInstruction}
 
 MENU:
 - Margherita Pizza: Rs. 800
@@ -48,28 +62,20 @@ PHONE: 0300-1234567
 DELIVERY: Available (30-45 mins)
 
 YOUR JOB:
-- Answer ONLY what is asked — nothing extra
+- Answer ONLY what is asked
 - Keep replies short and to the point
 - Only help with Pizza Palace related questions
-- If unrelated question: say "I can only help with Pizza Palace information"
-
-EXAMPLE:
-User: "What pizzas do you have?"
-Ali: "We have Margherita Pizza (Rs. 800) and Chicken BBQ Pizza (Rs. 1200)."
-
-User: "menu dikhao"
-Ali: "Yeh raha humara menu: Margherita Pizza Rs. 800, Chicken BBQ Pizza Rs. 1200, Beef Burger Rs. 600, French Fries Rs. 300, Cold Drink Rs. 150"
-
-User: "کیا ڈیلیوری ہوتی ہے؟"
-Ali: "جی ہاں، ڈیلیوری دستیاب ہے۔ 30-45 منٹ میں پہنچا دیں گے۔"`
+- If unrelated question: reply accordingly in detected language`
           },
-          ...req.body.messages
+          ...messages
         ],
-        max_tokens: 1000
+        max_tokens: 500
       })
     });
+
     const data = await response.json();
     console.log('Groq Response:', JSON.stringify(data));
+    console.log('Detected Language:', lang);
     res.json({
       content: [{
         text: data.choices[0].message.content
